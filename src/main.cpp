@@ -17,7 +17,6 @@ int frequency_counter = 0;
 unsigned long start_time; 
 float frequency = 0;
 
-
 void setup() {
   //Should be pulled up by default, but just in case, I've had some errors with this.
   pinMode(SDA, INPUT_PULLUP); 
@@ -95,8 +94,9 @@ void loop() {
   if (no_tca) {
     imu::Quaternion quat_0 = bno_0.getQuat();
     imu::Vector<3> accel_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-    buffer = String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4);
-
+    buffer = String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," 
+    + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
+    + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4);
   }
   else {
     TCASelect(0);
@@ -111,11 +111,15 @@ void loop() {
     imu::Quaternion quat_2 = bno_2.getQuat();
     imu::Vector<3> accel_2 = bno_2.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
     
-    buffer = String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," + String((float)quat_1.w(), 4) + "," + String((float)quat_1.x(), 4) + "," + String((float)quat_1.y(), 4) + "," + String((float)quat_1.z(), 4) + "," + String((float)quat_2.w(), 4) + "," + String((float)quat_2.x(), 4) + "," + String((float)quat_2.y(), 4) + "," + String((float)quat_2.z(), 4);
-    buffer += "," + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "," + String((float)accel_1.x(), 4) + "," + String((float)accel_1.y(), 4) + "," + String((float)accel_1.z(), 4) + "," + String((float)accel_2.x(), 4) + "," + String((float)accel_2.y(), 4) + "," + String((float)accel_2.z(), 4);
+    buffer = String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
+    + String((float)quat_1.w(), 4) + "," + String((float)quat_1.x(), 4) + "," + String((float)quat_1.y(), 4) + "," + String((float)quat_1.z(), 4) + "," 
+    + String((float)quat_2.w(), 4) + "," + String((float)quat_2.x(), 4) + "," + String((float)quat_2.y(), 4) + "," + String((float)quat_2.z(), 4);
+    buffer += "," + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "," 
+    + String((float)accel_1.x(), 4) + "," + String((float)accel_1.y(), 4) + "," + String((float)accel_1.z(), 4) + "," 
+    + String((float)accel_2.x(), 4) + "," + String((float)accel_2.y(), 4) + "," + String((float)accel_2.z(), 4);
   }
   
-  Serial.println(buffer);
+  //Serial.println(buffer);
 
   //send quaternion and accelerometer data via BLE
   m5_characteristic->setValue(buffer.c_str());
@@ -140,7 +144,7 @@ void loop() {
   // Avoid zero division
   if (elapsed_time != 0) {
     frequency = frequency_counter / (elapsed_time / 1000.0);
-    //Serial.println("Frequency: " + String(frequency));
+    Serial.println(String(frequency));
     /*
     M5.Lcd.clearDisplay();
     M5.Lcd.setTextColor(WHITE); 
@@ -150,5 +154,5 @@ void loop() {
     */
     
   }
-  delay(BNO055_SAMPLERATE_DELAY_MS);
+  //delay(BNO055_SAMPLERATE_DELAY_MS);
 }
