@@ -1,16 +1,12 @@
-
-#include <M5Stack.h>
-#include <Wire.h>
-#include "Adafruit_BNO055.h"
-#include <BLEDevice.h>
-#include <BLEServer.h> 
+#include "functions.h"
 
 #define BNO055_SAMPLERATE_DELAY_MS (10)
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
-
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
+Adafruit_BNO055 bno_0 = Adafruit_BNO055(55, 0x28);
+Adafruit_BNO055 bno_1 = Adafruit_BNO055(55, 0x28);
+Adafruit_BNO055 bno_2 = Adafruit_BNO055(55, 0x28);
 BLEServer *m5_server;
 BLEService *m5_service;
 BLECharacteristic *m5_characteristic;
@@ -19,22 +15,6 @@ String buffer = "";
 int frequency_counter = 0;
 unsigned long start_time; 
 float frequency = 0;
-
-void displaySensorDetails(void)
-{
-  sensor_t sensor;
-  bno.getSensor(&sensor);
-  Serial.println("------------------------------------");
-  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
-  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
-  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
-  Serial.println("------------------------------------");
-  Serial.println("");
-  delay(500);
-}
 
 
 void setup() {
@@ -45,24 +25,45 @@ void setup() {
   M5.begin();        // Init M5Core.
   M5.Power.begin();  // Init Power module.
 
-  M5.Lcd.setTextColor(WHITE); 
-  M5.Lcd.setTextSize(1);
-  M5.Lcd.setCursor(TFT_WIDTH / 2, TFT_HEIGHT / 2);
-  M5.Lcd.println("Starting...");
-  
-  
+  M5DisplayText("Starting!", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
+  delay(1000);
+  M5.Lcd.clear();
+ 
   Serial.begin(115200);
   delay(10);
-  Serial.println("WebSerial 3D Firmware"); Serial.println("");
+  M5DisplayText("Serial Started", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
+  delay(1000);
+  M5.Lcd.clear();
 
-  if(!bno.begin())
+  TCASelect(0);
+  if(!bno_0.begin())
   {
-    Serial.print("Error: No BNO055 detected");
+    Serial.print("Error: BNO0 not detected");
+    M5DisplayText("Error: BNO0 not detected", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
     while(1);
   }
-
   delay(1000);
-  bno.setExtCrystalUse(true);
+  bno_0.setExtCrystalUse(true);
+
+  TCASelect(1);
+  if(!bno_1.begin())
+  {
+    Serial.print("Error: BNO1 not detected");
+    M5DisplayText("Error: BNO1 not detected", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
+    while(1);
+  }
+  delay(1000);
+  bno_1.setExtCrystalUse(true);
+
+  TCASelect(2);
+  if(!bno_2.begin())
+  {
+    Serial.print("Error: BNO2 not detected");
+    M5DisplayText("Error: BNO2 not detected", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
+    while(1);
+  }
+  delay(1000);
+  bno_2.setExtCrystalUse(true);
 
   BLEDevice::init("M5Stack-Server");
   m5_server = BLEDevice::createServer();
@@ -79,25 +80,16 @@ void setup() {
 }
 
 void loop() {
-  /*
-  sensors_event_t event;
-  bno.getEvent(&event);
   
-  Serial.print(F("Orientation: "));
-  Serial.print(360 - (float)event.orientation.x);
-  Serial.print(F(", "));
-  Serial.print((float)event.orientation.y);
-  Serial.print(F(", "));
-  Serial.print((float)event.orientation.z);
-  Serial.println(F(""));
-  */
-
-  /* The WebSerial 3D Model Viewer also expects data as roll, pitch, heading */
-  imu::Quaternion quat = bno.getQuat();
-
-  buffer = String((float)quat.w(), 4) + "," + String((float)quat.x(), 4) + "," + String((float)quat.y(), 4) + "," + String((float)quat.z(), 4) + "," + String((float)quat.w(), 4) + "," + String((float)quat.x(), 4) + "," + String((float)quat.y(), 4) + "," + String((float)quat.z(), 4) + "," + String((float)quat.w(), 4) + "," + String((float)quat.x(), 4) + "," + String((float)quat.y(), 4) + "," + String((float)quat.z(), 4);
-  buffer += buffer; //double the data to test if it can be sent
+  TCASelect(0);
+  imu::Quaternion quat_0 = bno_0.getQuat();
+  TCASelect(1);
+  imu::Quaternion quat_1 = bno_1.getQuat();
+  TCASelect(2);
+  imu::Quaternion quat_2 = bno_2.getQuat();
   
+  buffer = String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," + String((float)quat_1.w(), 4) + "," + String((float)quat_1.x(), 4) + "," + String((float)quat_1.y(), 4) + "," + String((float)quat_1.z(), 4) + "," + String((float)quat_2.w(), 4) + "," + String((float)quat_2.x(), 4) + "," + String((float)quat_2.y(), 4) + "," + String((float)quat_2.z(), 4);
+  Serial.println(buffer);
   //code that can send quaternion data via ble to a client
   m5_characteristic->setValue(buffer.c_str());
 
@@ -121,7 +113,7 @@ void loop() {
   // Avoid zero division
   if (elapsed_time != 0) {
     frequency = frequency_counter / (elapsed_time / 1000.0);
-    Serial.println("Frequency: " + String(frequency));
+    //Serial.println("Frequency: " + String(frequency));
     /*
     M5.Lcd.clearDisplay();
     M5.Lcd.setTextColor(WHITE); 
