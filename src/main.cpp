@@ -82,15 +82,22 @@ void setup() {
 void loop() {
   
   TCASelect(0);
+  // read quaternion data
   imu::Quaternion quat_0 = bno_0.getQuat();
+  // read accelerometer data
+  imu::Vector<3> accel_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
   TCASelect(1);
   imu::Quaternion quat_1 = bno_1.getQuat();
+  imu::Vector<3> accel_1 = bno_1.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
   TCASelect(2);
   imu::Quaternion quat_2 = bno_2.getQuat();
+  imu::Vector<3> accel_2 = bno_2.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
   
   buffer = String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," + String((float)quat_1.w(), 4) + "," + String((float)quat_1.x(), 4) + "," + String((float)quat_1.y(), 4) + "," + String((float)quat_1.z(), 4) + "," + String((float)quat_2.w(), 4) + "," + String((float)quat_2.x(), 4) + "," + String((float)quat_2.y(), 4) + "," + String((float)quat_2.z(), 4);
+  buffer += "," + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "," + String((float)accel_1.x(), 4) + "," + String((float)accel_1.y(), 4) + "," + String((float)accel_1.z(), 4) + "," + String((float)accel_2.x(), 4) + "," + String((float)accel_2.y(), 4) + "," + String((float)accel_2.z(), 4);
   Serial.println(buffer);
-  //code that can send quaternion data via ble to a client
+
+  //send quaternion and accelerometer data via BLE
   m5_characteristic->setValue(buffer.c_str());
 
   
