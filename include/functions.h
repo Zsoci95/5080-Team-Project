@@ -9,4 +9,3 @@
 void displaySensorDetails(Adafruit_BNO055 imu);
 void M5DisplayText(String text, int x, int y, int size, int color); 
 void TCASelect(uint8_t i2c_address);
-
