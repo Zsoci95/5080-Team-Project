@@ -17,14 +17,7 @@ int frequency_counter = 0;
 unsigned long start_time; 
 float frequency = 0;
 
-class MyServerCallbacks: public BLEServerCallbacks {
-    void onConnect(BLEServer* pServer) {
-      pServer->startAdvertising(); // restart advertising
-    };
-    void onDisconnect(BLEServer* pServer) {
-      pServer->startAdvertising(); // restart advertising
-    }
-};
+
 
 void setup() {
   //Should be pulled up by default, but just in case, I've had some errors with this.
@@ -89,7 +82,7 @@ void setup() {
   Serial.print("BLE Address: ");
   Serial.println(address.toString().c_str());
   m5_server = BLEDevice::createServer();
-  m5_server->setCallbacks(new MyServerCallbacks());
+  m5_server->setCallbacks(new MyserverCallbacks());
   m5_service = m5_server->createService(SERVICE_UUID);
   m5_characteristic = m5_service->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ);
   m5_characteristic->setValue("Hello, World!");

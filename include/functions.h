@@ -9,3 +9,8 @@
 void displaySensorDetails(Adafruit_BNO055 imu);
 void M5DisplayText(String text, int x, int y, int size, int color); 
 void TCASelect(uint8_t i2c_address);
+
+class MyserverCallbacks: public BLEServerCallbacks {
+  void onConnect(BLEServer* pServer);
+  void onDisconnect(BLEServer* pServer); 
+};
