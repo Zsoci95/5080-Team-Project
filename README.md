@@ -10,6 +10,6 @@ How upload code to the M5
 7. Upload to M5 by pressing -> on the bottom left of VSCode (M5 should be plugged in)
 8. There will be errors, because the name of the upload port is different for every pc. 
 9. Open the platformio.ini file, and change the upload_port to the correct port.
-10. Only method I know to check the name of the port is to install the Arduino IDE (https://www.arduino.cc/en/software), click Select Board, and then select the M5Stack-Core-ESP32. It will show you the port and serial number of the plugged in M5 (see uploaded screenshot). Maybe you can do this from the device manager, but I don't haven't tried this on windows.
+10. Only method I know to check the name of the port is to install the Arduino IDE (https://www.arduino.cc/en/software), click Select Board, and then select the M5Stack-Core-ESP32. It will show you the port and serial number of the plugged in M5 (see uploaded screenshot). Maybe you can do this from the device manager, but I haven't tried this on windows.
 
 
