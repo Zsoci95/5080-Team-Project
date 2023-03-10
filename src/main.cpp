@@ -11,7 +11,7 @@ BLEServer *m5_server;
 BLEService *m5_service;
 BLECharacteristic *m5_characteristic;
 String buffer = "";
-bool no_tca = false; //Used for debugging, if you don't have the TCA9548A chip, set this to true.
+bool no_tca = true; //Used for debugging, if you don't have the TCA9548A chip, set this to true.
 
 int frequency_counter = 0;
 unsigned long start_time; 
@@ -95,14 +95,20 @@ void setup() {
   BLEDevice::startAdvertising();
 }
 
+
 void loop() {
   
   if (no_tca) {
     imu::Quaternion quat_0 = bno_0.getQuat();
     imu::Vector<3> accel_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-    buffer = String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," 
-    + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
-    + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4);
+
+    //Send the data 3 times to simulate 3 IMUs
+    buffer = "[" + String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
+     + String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
+     + String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
+     + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "," 
+     + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + ","
+     + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "]";
   }
   else {
     TCASelect(0);
@@ -117,12 +123,12 @@ void loop() {
     imu::Quaternion quat_2 = bno_2.getQuat();
     imu::Vector<3> accel_2 = bno_2.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
     
-    buffer = String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
+    buffer = "[" + String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
     + String((float)quat_1.w(), 4) + "," + String((float)quat_1.x(), 4) + "," + String((float)quat_1.y(), 4) + "," + String((float)quat_1.z(), 4) + "," 
-    + String((float)quat_2.w(), 4) + "," + String((float)quat_2.x(), 4) + "," + String((float)quat_2.y(), 4) + "," + String((float)quat_2.z(), 4);
-    buffer += "," + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "," 
+    + String((float)quat_2.w(), 4) + "," + String((float)quat_2.x(), 4) + "," + String((float)quat_2.y(), 4) + "," + String((float)quat_2.z(), 4) + ","
+    + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "," 
     + String((float)accel_1.x(), 4) + "," + String((float)accel_1.y(), 4) + "," + String((float)accel_1.z(), 4) + "," 
-    + String((float)accel_2.x(), 4) + "," + String((float)accel_2.y(), 4) + "," + String((float)accel_2.z(), 4);
+    + String((float)accel_2.x(), 4) + "," + String((float)accel_2.y(), 4) + "," + String((float)accel_2.z(), 4) + "]";
   }
   
   //Serial.println(buffer);
@@ -160,5 +166,5 @@ void loop() {
     */
     
   }
-  //delay(BNO055_SAMPLERATE_DELAY_MS);
+  delay(5);
 }
