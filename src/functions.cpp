@@ -33,7 +33,7 @@ void TCASelect(uint8_t i2c_address)
 };
 
 void MyserverCallbacks::onConnect(BLEServer* pServer) {
-  //pServer->startAdvertising(); // restart advertising
+  pServer->startAdvertising(); // restart advertising
 };
 
 void MyserverCallbacks::onDisconnect(BLEServer* pServer) {

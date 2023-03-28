@@ -3,6 +3,8 @@
 #define BNO055_SAMPLERATE_DELAY_MS (10)
 #define SERVICE_UUID        "bd0f56c6-a403-4d3a-86ba-6fed11ce8473" //Randomly generated UUID
 #define CHARACTERISTIC_UUID "1fe90638-437c-490c-ad92-bda3b9423bab" 
+//BLEDescriptor *m5_descriptor = new BLEDescriptor(BLEUUID((uint16_t)0x2901));
+
 
 Adafruit_BNO055 bno_0 = Adafruit_BNO055(55, 0x28);
 Adafruit_BNO055 bno_1 = Adafruit_BNO055(55, 0x28);
@@ -84,31 +86,40 @@ void setup() {
   m5_server = BLEDevice::createServer();
   m5_server->setCallbacks(new MyserverCallbacks());
   m5_service = m5_server->createService(SERVICE_UUID);
-  m5_characteristic = m5_service->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ);
-  m5_characteristic->setValue("Hello, World!");
+  m5_characteristic = m5_service->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_NOTIFY);
+  BLEDescriptor *m5_descriptor = new BLEDescriptor(CHARACTERISTIC_UUID);
+  m5_descriptor->setValue("IMU_Data");
+  m5_characteristic->addDescriptor(new BLE2902());
   m5_service->start();
+  
   BLEAdvertising *m5_advertising = BLEDevice::getAdvertising();
   m5_advertising->addServiceUUID(SERVICE_UUID);
-  m5_advertising->setScanResponse(true);
-  m5_advertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-  m5_advertising->setMinPreferred(0x12);
+  m5_advertising->setMaxInterval(0x100); 
+  m5_advertising->setMinInterval(0x75);
+  m5_advertising->setScanResponse(false); 
+  
+  //m5_advertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
+  Serial.println("Waiting a client connection to notify...");
+  
 }
 
 
 void loop() {
+
   
+ 
   if (no_tca) {
     imu::Quaternion quat_0 = bno_0.getQuat();
-    imu::Vector<3> accel_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    imu::Vector<3> accel_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
 
     //Send the data 3 times to simulate 3 IMUs
-    buffer = "[" + String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
-     + String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
-     + String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
-     + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "," 
-     + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + ","
-     + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "]";
+    buffer = "[" + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
+     + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
+     + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
+     + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "," 
+     + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + ","
+     + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "]";
   }
   else {
     TCASelect(0);
@@ -123,19 +134,19 @@ void loop() {
     imu::Quaternion quat_2 = bno_2.getQuat();
     imu::Vector<3> accel_2 = bno_2.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
     
-    buffer = "[" + String((float)quat_0.w(), 4) + "," + String((float)quat_0.x(), 4) + "," + String((float)quat_0.y(), 4) + "," + String((float)quat_0.z(), 4) + "," 
-    + String((float)quat_1.w(), 4) + "," + String((float)quat_1.x(), 4) + "," + String((float)quat_1.y(), 4) + "," + String((float)quat_1.z(), 4) + "," 
-    + String((float)quat_2.w(), 4) + "," + String((float)quat_2.x(), 4) + "," + String((float)quat_2.y(), 4) + "," + String((float)quat_2.z(), 4) + ","
-    + String((float)accel_0.x(), 4) + "," + String((float)accel_0.y(), 4) + "," + String((float)accel_0.z(), 4) + "," 
-    + String((float)accel_1.x(), 4) + "," + String((float)accel_1.y(), 4) + "," + String((float)accel_1.z(), 4) + "," 
-    + String((float)accel_2.x(), 4) + "," + String((float)accel_2.y(), 4) + "," + String((float)accel_2.z(), 4) + "]";
+    buffer = "[" + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
+    + String((float)quat_1.w(), 2) + "," + String((float)quat_1.x(), 2) + "," + String((float)quat_1.y(), 2) + "," + String((float)quat_1.z(), 2) + "," 
+    + String((float)quat_2.w(), 2) + "," + String((float)quat_2.x(), 2) + "," + String((float)quat_2.y(), 2) + "," + String((float)quat_2.z(), 2) + ","
+    + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "," 
+    + String((float)accel_1.x(), 2) + "," + String((float)accel_1.y(), 2) + "," + String((float)accel_1.z(), 2) + "," 
+    + String((float)accel_2.x(), 2) + "," + String((float)accel_2.y(), 2) + "," + String((float)accel_2.z(), 2) + "]";
   }
   
   //Serial.println(buffer);
-
   //send quaternion and accelerometer data via BLE
+  //Serial.println(buffer);
   m5_characteristic->setValue(buffer.c_str());
-
+  m5_characteristic->notify();
   
   //Serial.print(F("Quaternion: "));
   //Serial.println(buffer);
@@ -166,5 +177,4 @@ void loop() {
     */
     
   }
-  delay(5);
 }
