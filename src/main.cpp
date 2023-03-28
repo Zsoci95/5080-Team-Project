@@ -13,7 +13,7 @@ BLEServer *m5_server;
 BLEService *m5_service;
 BLECharacteristic *m5_characteristic;
 String buffer = "";
-bool no_tca = true; //Used for debugging, if you don't have the TCA9548A chip, set this to true.
+bool no_tca = false; //Used for debugging, if you don't have the TCA9548A chip, set this to true.
 
 int frequency_counter = 0;
 unsigned long start_time; 
@@ -87,16 +87,15 @@ void setup() {
   m5_server->setCallbacks(new MyserverCallbacks());
   m5_service = m5_server->createService(SERVICE_UUID);
   m5_characteristic = m5_service->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_NOTIFY);
-  BLEDescriptor *m5_descriptor = new BLEDescriptor(CHARACTERISTIC_UUID);
-  m5_descriptor->setValue("IMU_Data");
   m5_characteristic->addDescriptor(new BLE2902());
+  m5_characteristic->setCallbacks(new MyCallbacks());
   m5_service->start();
   
   BLEAdvertising *m5_advertising = BLEDevice::getAdvertising();
   m5_advertising->addServiceUUID(SERVICE_UUID);
   m5_advertising->setMaxInterval(0x100); 
   m5_advertising->setMinInterval(0x75);
-  m5_advertising->setScanResponse(false); 
+  m5_advertising->setScanResponse(true); 
   
   //m5_advertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
@@ -167,7 +166,7 @@ void loop() {
   // Avoid zero division
   if (elapsed_time != 0) {
     frequency = frequency_counter / (elapsed_time / 1000.0);
-    Serial.println(String(frequency));
+    //Serial.println(String(frequency));
     /*
     M5.Lcd.clearDisplay();
     M5.Lcd.setTextColor(WHITE); 

@@ -16,3 +16,7 @@ class MyserverCallbacks: public BLEServerCallbacks {
   void onDisconnect(BLEServer* pServer); 
 };
 
+class MyCallbacks: public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pCharacteristic);
+};
+
