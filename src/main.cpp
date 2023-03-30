@@ -25,6 +25,8 @@ unsigned long start_time;
 float frequency = 0;
 
 
+ 
+
 
 void setup() {
 
@@ -127,12 +129,7 @@ void loop() {
     imu::Vector<3> accel_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
 
     //Send the data 3 times to simulate 3 IMUs
-    buffer = "[" + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
-                 + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
-                 + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
-                 + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "," 
-                 + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + ","
-                 + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "]";
+    buffer = createBuffer(2, quat_0, quat_0, quat_0, accel_0, accel_0, accel_0);
   }
   else {
     TCASelect(0);
@@ -146,13 +143,8 @@ void loop() {
     TCASelect(2);
     imu::Quaternion quat_2 = bno_2.getQuat();
     imu::Vector<3> accel_2 = bno_2.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-    
-    buffer = "[" + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
-                 + String((float)quat_1.w(), 2) + "," + String((float)quat_1.x(), 2) + "," + String((float)quat_1.y(), 2) + "," + String((float)quat_1.z(), 2) + "," 
-                 + String((float)quat_2.w(), 2) + "," + String((float)quat_2.x(), 2) + "," + String((float)quat_2.y(), 2) + "," + String((float)quat_2.z(), 2) + ","
-                 + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "," 
-                 + String((float)accel_1.x(), 2) + "," + String((float)accel_1.y(), 2) + "," + String((float)accel_1.z(), 2) + "," 
-                 + String((float)accel_2.x(), 2) + "," + String((float)accel_2.y(), 2) + "," + String((float)accel_2.z(), 2) + "]";
+
+    buffer = createBuffer(2, quat_0, quat_1, quat_2, accel_0, accel_1, accel_2);
   }
   
   //Serial.println(buffer);

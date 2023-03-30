@@ -1,7 +1,7 @@
 #include "functions.h"
 
 void displayESPInfo(){
-  
+
   
 
 };
@@ -48,4 +48,17 @@ void MyCallbacks::onNotify(BLECharacteristic *pCharacteristic) {
 
 };
 
+String createBuffer(char digits, imu::Quaternion quat_0, imu::Quaternion quat_1, imu::Quaternion quat_2, 
+imu::Vector<3> accel_0,  imu::Vector<3> accel_1,  imu::Vector<3> accel_2) {
+
+  String buffer = "[" + String((float)quat_0.w(), digits) + "," + String((float)quat_0.x(), digits) + "," + String((float)quat_0.y(), digits) + "," + String((float)quat_0.z(), digits) + "," 
+                      + String((float)quat_1.w(), digits) + "," + String((float)quat_1.x(), digits) + "," + String((float)quat_1.y(), digits) + "," + String((float)quat_1.z(), digits) + "," 
+                      + String((float)quat_2.w(), digits) + "," + String((float)quat_2.x(), digits) + "," + String((float)quat_2.y(), digits) + "," + String((float)quat_2.z(), digits) + ","
+                      + String((float)accel_0.x(), digits) + "," + String((float)accel_0.y(), digits) + "," + String((float)accel_0.z(), digits) + "," 
+                      + String((float)accel_1.x(), digits) + "," + String((float)accel_1.y(), digits) + "," + String((float)accel_1.z(), digits) + "," 
+                      + String((float)accel_2.x(), digits) + "," + String((float)accel_2.y(), digits) + "," + String((float)accel_2.z(), digits) + "]";
+  
+  return buffer;
+
+}; 
 

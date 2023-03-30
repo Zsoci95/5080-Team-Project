@@ -21,3 +21,5 @@ class MyCallbacks: public BLECharacteristicCallbacks {
   void onNotify(BLECharacteristic *pCharacteristic);
 };
 
+String createBuffer(char digits, imu::Quaternion quat_0, imu::Quaternion quat_1, imu::Quaternion quat_2, 
+imu::Vector<3> accel_0,  imu::Vector<3> accel_1,  imu::Vector<3> accel_2);
