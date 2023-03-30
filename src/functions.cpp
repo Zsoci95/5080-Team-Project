@@ -21,12 +21,17 @@ void displaySensorDetails(Adafruit_BNO055 imu)
   delay(500);
 }; 
 
-void M5DisplayText(String text, int x, int y, int size, int color)
+void M5DisplayText(String text, int x, int y, int size, int color, int time)
 {
   M5.Lcd.setTextSize(size);
   M5.Lcd.setTextColor(color);
   M5.Lcd.setCursor(x, y);
   M5.Lcd.print(text);
+  delay(time);
+  if (time > 0) {
+    M5.Lcd.clear(); 
+  }
+  
 }; 
 
 void TCASelect(uint8_t i2c_address)
@@ -69,10 +74,21 @@ void initBNO(Adafruit_BNO055 bno, int bno_number) {
   if(!bno.begin())
   {
     Serial.print(message);
-    M5DisplayText(message, TFT_WIDTH / 3, TFT_HEIGHT / 2, 1, WHITE);
+    M5DisplayText(message, TFT_WIDTH / 3, TFT_HEIGHT / 2, 1, WHITE, 0);
     while(1);
   }
   delay(1000);
   bno.setExtCrystalUse(true);
   
+};
+
+void batteryISR() {
+  batteryLevel = M5.Axp.GetBatVoltage();
+  batteryLevel = map(batteryLevel, 3300, 4200, 0, 100);
+  if (batteryLevel < 0) {
+    batteryLevel = 0;
+  }
+  if (batteryLevel > 100) {
+    batteryLevel = 100;
+  }
 };

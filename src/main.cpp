@@ -1,35 +1,35 @@
 #include "functions.h"
 
-#define BNO055_SAMPLERATE_DELAY_MS (10)
-#define SERVICE_UUID        "bd0f56c6-a403-4d3a-86ba-6fed11ce8473" //Randomly generated UUID
-#define CHARACTERISTIC_UUID "1fe90638-437c-490c-ad92-bda3b9423bab" 
-//BLEDescriptor *m5_descriptor = new BLEDescriptor(BLEUUID((uint16_t)0x2901));
-
-
+// define the three IMUs
 Adafruit_BNO055 bno_0 = Adafruit_BNO055(55, 0x28);
 Adafruit_BNO055 bno_1 = Adafruit_BNO055(55, 0x28);
 Adafruit_BNO055 bno_2 = Adafruit_BNO055(55, 0x28);
 
-//100Hz = 10ms 
-const unsigned long period = 10; //ms
+//Variables for calculating frequency and keeping the loop at a constant rate
+const unsigned long period = 10; //ms, therefore 100hz
 unsigned long previous_millis = 0; 
-
-BLEServer *m5_server = NULL; // Initialize pointers to null
-BLEService *m5_service = NULL;
-BLECharacteristic *m5_characteristic = NULL;
-String buffer = "";
-bool no_tca = false; //Used for debugging, if you don't have the TCA9548A chip, set this to true.
-
 int frequency_counter = 0;
 unsigned long start_time; 
 float frequency = 0;
 
+//Variables for BLE
+BLEServer *m5_server = NULL; // Initialize pointers to null
+BLEService *m5_service = NULL;
+BLECharacteristic *m5_characteristic = NULL;
+String buffer = "";
 
- 
+
+//Variables for battery
+unsigned long last_battery_check = 0;
+float battery_voltage = 0;
+
+
+//Set to true if you don't have the TCA9548A chip
+bool no_tca = false; //Used for debugging, if you don't have the TCA9548A chip, set this to true.
+
 
 
 void setup() {
-
 
   //Should be pulled up by default, but just in case, I've had some errors with this.
   pinMode(SDA, INPUT_PULLUP); 
@@ -38,15 +38,13 @@ void setup() {
   M5.begin();        // Init M5Core.
   M5.Power.begin();  // Init Power module.
 
-  M5DisplayText("Starting!", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
-  delay(1000);
-  M5.Lcd.clear();
+  M5DisplayText("Starting!", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE, 1000);
+ 
  
   Serial.begin(115200);
   delay(10);
-  M5DisplayText("Serial Started", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
-  delay(1000);
-  M5.Lcd.clear();
+  M5DisplayText("Serial Started", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE, 1000);
+  
 
   
   Wire.setClock(400000); //set the i2c speed to 400khz
@@ -64,13 +62,17 @@ void setup() {
     initBNO(bno_2, 2);
   }
   
-
+  //Init BLE Device
   BLEDevice::init("M5Stack-Server");
   BLEAddress address = BLEDevice::getAddress();
   Serial.print("BLE Address: ");
   Serial.println(address.toString().c_str());
+
+  //Init BLE Server
   m5_server = BLEDevice::createServer();
   m5_server->setCallbacks(new MyserverCallbacks());
+
+  //Init BLE Service, Characteristic and Descriptor
   m5_service = m5_server->createService(SERVICE_UUID);
   m5_characteristic = m5_service->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_NOTIFY);
   BLE2902 *m5_descriptor = new BLE2902(); 
@@ -80,16 +82,17 @@ void setup() {
   m5_characteristic->setCallbacks(new MyCallbacks());
   m5_service->start();
   
+  //Init BLE Advertising
   BLEAdvertising *m5_advertising = BLEDevice::getAdvertising();
   m5_advertising->addServiceUUID(SERVICE_UUID);
-  //m5_advertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
-  m5_advertising->setMaxInterval(0x100); // TODO: What happens if setminpreffered is 0 and these are removed?
+  m5_advertising->setMaxInterval(0x100); 
   m5_advertising->setMinInterval(0x75);
   m5_advertising->setScanResponse(false); 
-  
-  //m5_advertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
-  Serial.println("Waiting a client connection to notify...");
+
+
+  Serial.println("Init done!");
+  M5DisplayText("Init done!", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE, 1000);
   
 }
 
@@ -121,7 +124,7 @@ void loop() {
     
   }
   
-  //Serial.println(buffer);
+  //Send the data via BLE
   m5_characteristic->setValue(buffer.c_str());
   m5_characteristic->notify();
   
@@ -138,6 +141,8 @@ void loop() {
     //Serial.println(String(frequency));
   }
 
+
+  //Keep the loop at a constant rate
   while (millis() - previous_millis < period) {
     // do nothing
   }
