@@ -52,42 +52,16 @@ void setup() {
   Wire.setClock(400000); //set the i2c speed to 400khz
 
   if (no_tca) {
-    if (!bno_0.begin())
-    {
-      Serial.print("Error: BNO0 not detected");
-      M5DisplayText("Error: BNO0 not detected", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
-      while(1);
-      delay(1000);
-      bno_0.setExtCrystalUse(true);
-    }
-  }
-  else {
+    initBNO(bno_0, 0);
+  } else {
     TCASelect(0);
-    if(!bno_0.begin()) {
-      Serial.print("Error: BNO0 not detected");
-      M5DisplayText("Error: BNO0 not detected", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
-      while(1);
-    }
-    delay(1000);
-    bno_0.setExtCrystalUse(true);
+    initBNO(bno_0, 0);
 
     TCASelect(1);
-    if(!bno_1.begin()) {
-      Serial.print("Error: BNO1 not detected");
-      M5DisplayText("Error: BNO1 not detected", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
-      while(1);
-    }
-    delay(1000);
-    bno_1.setExtCrystalUse(true);
-
+    initBNO(bno_1, 1);
+   
     TCASelect(2);
-    if(!bno_2.begin()) {
-      Serial.print("Error: BNO2 not detected");
-      M5DisplayText("Error: BNO2 not detected", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
-      while(1);
-    }
-    delay(1000);
-    bno_2.setExtCrystalUse(true);
+    initBNO(bno_2, 2);
   }
   
 
@@ -122,7 +96,6 @@ void setup() {
 
 void loop() {
 
-  
  
   if (no_tca) {
     imu::Quaternion quat_0 = bno_0.getQuat();
@@ -145,23 +118,13 @@ void loop() {
     imu::Vector<3> accel_2 = bno_2.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
 
     buffer = createBuffer(2, quat_0, quat_1, quat_2, accel_0, accel_1, accel_2);
+    
   }
   
-  //Serial.println(buffer);
-  //send quaternion and accelerometer data via BLE
   //Serial.println(buffer);
   m5_characteristic->setValue(buffer.c_str());
   m5_characteristic->notify();
   
-  //Serial.print(F("Quaternion: "));
-  //Serial.println(buffer);
-  
-
-  //std::string value = m5_characteristic->getValue();
-  //Serial.print("The new characteristic value is: ");
-  //Serial.println(value.c_str());
-
-
   if (frequency_counter == 0) {
     start_time = millis(); // start the timer
   }
@@ -172,7 +135,7 @@ void loop() {
   // Avoid zero division
   if (elapsed_time != 0) {
     frequency = frequency_counter / (elapsed_time / 1000.0);
-    Serial.println(String(frequency));
+    //Serial.println(String(frequency));
   }
 
   while (millis() - previous_millis < period) {

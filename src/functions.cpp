@@ -56,9 +56,23 @@ imu::Vector<3> accel_0,  imu::Vector<3> accel_1,  imu::Vector<3> accel_2) {
                       + String((float)quat_2.w(), digits) + "," + String((float)quat_2.x(), digits) + "," + String((float)quat_2.y(), digits) + "," + String((float)quat_2.z(), digits) + ","
                       + String((float)accel_0.x(), digits) + "," + String((float)accel_0.y(), digits) + "," + String((float)accel_0.z(), digits) + "," 
                       + String((float)accel_1.x(), digits) + "," + String((float)accel_1.y(), digits) + "," + String((float)accel_1.z(), digits) + "," 
-                      + String((float)accel_2.x(), digits) + "," + String((float)accel_2.y(), digits) + "," + String((float)accel_2.z(), digits) + "]";
+                      + String((float)accel_2.x(), digits) + "," + String((float)accel_2.y(), digits) + "," + String((float)accel_2.z(), digits) +  "]";
   
   return buffer;
 
 }; 
 
+void initBNO(Adafruit_BNO055 bno, int bno_number) {
+
+  String message = "Not detected BNO number: " + String(bno_number);
+  
+  if(!bno.begin())
+  {
+    Serial.print(message);
+    M5DisplayText(message, TFT_WIDTH / 3, TFT_HEIGHT / 2, 1, WHITE);
+    while(1);
+  }
+  delay(1000);
+  bno.setExtCrystalUse(true);
+  
+};
