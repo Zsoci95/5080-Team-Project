@@ -9,9 +9,14 @@
 Adafruit_BNO055 bno_0 = Adafruit_BNO055(55, 0x28);
 Adafruit_BNO055 bno_1 = Adafruit_BNO055(55, 0x28);
 Adafruit_BNO055 bno_2 = Adafruit_BNO055(55, 0x28);
-BLEServer *m5_server;
-BLEService *m5_service;
-BLECharacteristic *m5_characteristic;
+
+//100Hz = 10ms 
+const unsigned long period = 10; //ms
+unsigned long previous_millis = 0; 
+
+BLEServer *m5_server = NULL; // Initialize pointers to null
+BLEService *m5_service = NULL;
+BLECharacteristic *m5_characteristic = NULL;
 String buffer = "";
 bool no_tca = false; //Used for debugging, if you don't have the TCA9548A chip, set this to true.
 
@@ -22,6 +27,8 @@ float frequency = 0;
 
 
 void setup() {
+
+
   //Should be pulled up by default, but just in case, I've had some errors with this.
   pinMode(SDA, INPUT_PULLUP); 
   pinMode(SCL, INPUT_PULLUP);
@@ -38,6 +45,9 @@ void setup() {
   M5DisplayText("Serial Started", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE);
   delay(1000);
   M5.Lcd.clear();
+
+  
+  Wire.setClock(400000); //set the i2c speed to 400khz
 
   if (no_tca) {
     if (!bno_0.begin())
@@ -87,15 +97,19 @@ void setup() {
   m5_server->setCallbacks(new MyserverCallbacks());
   m5_service = m5_server->createService(SERVICE_UUID);
   m5_characteristic = m5_service->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_NOTIFY);
-  m5_characteristic->addDescriptor(new BLE2902());
+  BLE2902 *m5_descriptor = new BLE2902(); 
+  m5_descriptor->setNotifications(true); 
+  m5_descriptor->setIndications(false);
+  m5_characteristic->addDescriptor(m5_descriptor);
   m5_characteristic->setCallbacks(new MyCallbacks());
   m5_service->start();
   
   BLEAdvertising *m5_advertising = BLEDevice::getAdvertising();
   m5_advertising->addServiceUUID(SERVICE_UUID);
-  m5_advertising->setMaxInterval(0x100); 
+  //m5_advertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
+  m5_advertising->setMaxInterval(0x100); // TODO: What happens if setminpreffered is 0 and these are removed?
   m5_advertising->setMinInterval(0x75);
-  m5_advertising->setScanResponse(true); 
+  m5_advertising->setScanResponse(false); 
   
   //m5_advertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
@@ -114,11 +128,11 @@ void loop() {
 
     //Send the data 3 times to simulate 3 IMUs
     buffer = "[" + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
-     + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
-     + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
-     + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "," 
-     + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + ","
-     + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "]";
+                 + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
+                 + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
+                 + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "," 
+                 + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + ","
+                 + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "]";
   }
   else {
     TCASelect(0);
@@ -134,11 +148,11 @@ void loop() {
     imu::Vector<3> accel_2 = bno_2.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
     
     buffer = "[" + String((float)quat_0.w(), 2) + "," + String((float)quat_0.x(), 2) + "," + String((float)quat_0.y(), 2) + "," + String((float)quat_0.z(), 2) + "," 
-    + String((float)quat_1.w(), 2) + "," + String((float)quat_1.x(), 2) + "," + String((float)quat_1.y(), 2) + "," + String((float)quat_1.z(), 2) + "," 
-    + String((float)quat_2.w(), 2) + "," + String((float)quat_2.x(), 2) + "," + String((float)quat_2.y(), 2) + "," + String((float)quat_2.z(), 2) + ","
-    + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "," 
-    + String((float)accel_1.x(), 2) + "," + String((float)accel_1.y(), 2) + "," + String((float)accel_1.z(), 2) + "," 
-    + String((float)accel_2.x(), 2) + "," + String((float)accel_2.y(), 2) + "," + String((float)accel_2.z(), 2) + "]";
+                 + String((float)quat_1.w(), 2) + "," + String((float)quat_1.x(), 2) + "," + String((float)quat_1.y(), 2) + "," + String((float)quat_1.z(), 2) + "," 
+                 + String((float)quat_2.w(), 2) + "," + String((float)quat_2.x(), 2) + "," + String((float)quat_2.y(), 2) + "," + String((float)quat_2.z(), 2) + ","
+                 + String((float)accel_0.x(), 2) + "," + String((float)accel_0.y(), 2) + "," + String((float)accel_0.z(), 2) + "," 
+                 + String((float)accel_1.x(), 2) + "," + String((float)accel_1.y(), 2) + "," + String((float)accel_1.z(), 2) + "," 
+                 + String((float)accel_2.x(), 2) + "," + String((float)accel_2.y(), 2) + "," + String((float)accel_2.z(), 2) + "]";
   }
   
   //Serial.println(buffer);
@@ -166,14 +180,12 @@ void loop() {
   // Avoid zero division
   if (elapsed_time != 0) {
     frequency = frequency_counter / (elapsed_time / 1000.0);
-    //Serial.println(String(frequency));
-    /*
-    M5.Lcd.clearDisplay();
-    M5.Lcd.setTextColor(WHITE); 
-    M5.Lcd.setTextSize(1);
-    M5.Lcd.setCursor(TFT_WIDTH / 2, TFT_HEIGHT / 2);
-    M5.Lcd.printf("Frequency: %f", frequency);
-    */
-    
+    Serial.println(String(frequency));
   }
+
+  while (millis() - previous_millis < period) {
+    // do nothing
+  }
+  previous_millis = millis();
+ 
 }

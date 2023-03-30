@@ -1,6 +1,10 @@
 #include "functions.h"
 
+void displayESPInfo(){
+  
+  
 
+};
 void displaySensorDetails(Adafruit_BNO055 imu)
 {
   sensor_t sensor;
@@ -33,22 +37,15 @@ void TCASelect(uint8_t i2c_address)
 };
 
 void MyserverCallbacks::onConnect(BLEServer* pServer) {
-  pServer->startAdvertising(); // restart advertising
+  //pServer->startAdvertising(); // TODO: check if advertising stops after connection
 };
 
 void MyserverCallbacks::onDisconnect(BLEServer* pServer) {
   pServer->startAdvertising(); // restart advertising
 };
 
-void MyCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
-  std::string rxValue = pCharacteristic->getValue();
-  if (rxValue.length() > 0) {
-    Serial.println("*********");
-    Serial.print("Received Value: ");
-    for (int i = 0; i < rxValue.length(); i++)
-      Serial.print(rxValue[i]);
-    Serial.println();
-    Serial.println("*********");
-  }
+void MyCallbacks::onNotify(BLECharacteristic *pCharacteristic) {
+
 };
+
 

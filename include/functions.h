@@ -7,6 +7,7 @@
 #include <BLE2902.h>
 #define TCA9548A_ADDRESS 0x70
 
+void displayESPInfo();
 void displaySensorDetails(Adafruit_BNO055 imu);
 void M5DisplayText(String text, int x, int y, int size, int color); 
 void TCASelect(uint8_t i2c_address);
@@ -17,6 +18,6 @@ class MyserverCallbacks: public BLEServerCallbacks {
 };
 
 class MyCallbacks: public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic *pCharacteristic);
+  void onNotify(BLECharacteristic *pCharacteristic);
 };
 
