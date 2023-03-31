@@ -83,12 +83,5 @@ void initBNO(Adafruit_BNO055 bno, int bno_number) {
 };
 
 void batteryISR() {
-  batteryLevel = M5.Axp.GetBatVoltage();
-  batteryLevel = map(batteryLevel, 3300, 4200, 0, 100);
-  if (batteryLevel < 0) {
-    batteryLevel = 0;
-  }
-  if (batteryLevel > 100) {
-    batteryLevel = 100;
-  }
+  
 };
