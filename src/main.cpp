@@ -120,7 +120,7 @@ void loop() {
     imu::Quaternion quat_2 = bno_2.getQuat();
     imu::Vector<3> accel_2 = bno_2.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
 
-    buffer = createBuffer(2, quat_0, quat_1, quat_2, accel_0, accel_1, accel_2);
+    buffer = createBuffer(4, quat_0, quat_1, quat_2, accel_0, accel_1, accel_2);
     
   }
   
