@@ -83,5 +83,13 @@ void initBNO(Adafruit_BNO055 bno, int bno_number) {
 };
 
 void batteryISR() {
-  
+  M5.Lcd.clear();
+  int8_t battery_level = M5.Power.getBatteryLevel();
+  if (battery_level < 0) {
+    M5DisplayText(String(battery_level) + "%", 0, 0, 3, WHITE, 0);
+  }
+  else {
+    M5DisplayText(String(battery_level) + "%", 0, 0, 3, WHITE, 0);
+  }
+
 };

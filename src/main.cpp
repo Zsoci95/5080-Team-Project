@@ -7,6 +7,8 @@ Adafruit_BNO055 bno_2 = Adafruit_BNO055(55, 0x28);
 
 //Variables for calculating frequency and keeping the loop at a constant rate
 const unsigned long period = 10; //ms, therefore 100hz
+unsigned long last_battery_reading = 0; 
+const unsigned long refresh_rate = 40; //ms, therefore 25hz
 unsigned long previous_millis = 0; 
 int frequency_counter = 0;
 unsigned long start_time; 
@@ -25,11 +27,14 @@ float battery_voltage = 0;
 
 
 //Set to true if you don't have the TCA9548A chip
-bool no_tca = false; //Used for debugging, if you don't have the TCA9548A chip, set this to true.
+bool no_tca = false; 
 
 
 
 void setup() {
+
+  //attach timer interrupt to batteryISR 
+  
 
   //Should be pulled up by default, but just in case, I've had some errors with this.
   pinMode(SDA, INPUT_PULLUP); 
@@ -45,7 +50,6 @@ void setup() {
   delay(10);
   M5DisplayText("Serial Started", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE, 1000);
   
-
   
   Wire.setClock(400000); //set the i2c speed to 400khz
 
@@ -79,7 +83,6 @@ void setup() {
   m5_descriptor->setNotifications(true); 
   m5_descriptor->setIndications(false);
   m5_characteristic->addDescriptor(m5_descriptor);
-  m5_characteristic->setCallbacks(new MyCallbacks());
   m5_service->start();
   
   //Init BLE Advertising
@@ -93,12 +96,18 @@ void setup() {
 
   Serial.println("Init done!");
   M5DisplayText("Init done!", TFT_WIDTH / 2, TFT_HEIGHT / 2, 1, WHITE, 1000);
+  int batteryLevel = M5.Power.getBatteryLevel();
+  M5.Lcd.fillRect(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK); // Clear previous text
+  M5.Lcd.setCursor(TFT_WIDTH / 2, TFT_HEIGHT / 3);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.print(String(batteryLevel) + "%");
   
 }
 
 
 void loop() {
-
+ 
  
   if (no_tca) {
     imu::Quaternion quat_0 = bno_0.getQuat();
@@ -147,5 +156,17 @@ void loop() {
     // do nothing
   }
   previous_millis = millis();
- 
+
+  if (millis() - last_battery_check >= BATTERY_READ_INTERVAL) {
+    // Get the battery level and display it on the screen
+    int batteryLevel = M5.Power.getBatteryLevel();
+    M5.Lcd.fillRect(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK); // Clear previous text
+    M5.Lcd.setCursor(TFT_WIDTH / 2, TFT_HEIGHT / 3);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.print(String(batteryLevel) + "%");
+    last_battery_check = millis(); // Update last update time
+  }
+
+  
 }

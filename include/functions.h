@@ -6,9 +6,10 @@
 #include "Adafruit_BNO055.h"
 #include <BLE2902.h>
 
-#define TCA9548A_ADDRESS 0x70
-#define SERVICE_UUID        "bd0f56c6-a403-4d3a-86ba-6fed11ce8473" //Randomly generated UUID
-#define CHARACTERISTIC_UUID "1fe90638-437c-490c-ad92-bda3b9423bab" 
+#define TCA9548A_ADDRESS      0x70
+#define SERVICE_UUID          "bd0f56c6-a403-4d3a-86ba-6fed11ce8473" //Randomly generated UUID
+#define CHARACTERISTIC_UUID   "1fe90638-437c-490c-ad92-bda3b9423bab" 
+#define BATTERY_READ_INTERVAL 300000 //5 minutes in ms 
 
 void displayESPInfo();
 void displaySensorDetails(Adafruit_BNO055 imu);
