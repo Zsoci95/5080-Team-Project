@@ -112,24 +112,25 @@ void loop() {
   if (no_tca) {
     imu::Quaternion quat_0 = bno_0.getQuat();
     imu::Vector<3> accel_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+    imu::Vector<3> gyro_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
 
     //Send the data 3 times to simulate 3 IMUs
-    buffer = createBuffer(2, quat_0, quat_0, quat_0, accel_0, accel_0, accel_0);
+    buffer = createBuffer(2, quat_0, quat_0, quat_0, accel_0, gyro_0);
   }
   else {
     TCASelect(0);
     // read quaternion data
     imu::Quaternion quat_0 = bno_0.getQuat();
     // read accelerometer data
-    imu::Vector<3> accel_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    imu::Vector<3> accel_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+    imu::Vector<3> gyro_0 = bno_0.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
     TCASelect(1);
     imu::Quaternion quat_1 = bno_1.getQuat();
-    imu::Vector<3> accel_1 = bno_1.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    
     TCASelect(2);
     imu::Quaternion quat_2 = bno_2.getQuat();
-    imu::Vector<3> accel_2 = bno_2.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
 
-    buffer = createBuffer(4, quat_0, quat_1, quat_2, accel_0, accel_1, accel_2);
+    buffer = createBuffer(4, quat_0, quat_1, quat_2, accel_0, gyro_0);
     
   }
   

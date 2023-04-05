@@ -26,7 +26,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 };
 
 String createBuffer(char digits, imu::Quaternion quat_0, imu::Quaternion quat_1, imu::Quaternion quat_2, 
-imu::Vector<3> accel_0,  imu::Vector<3> accel_1,  imu::Vector<3> accel_2);
+imu::Vector<3> accel_0,  imu::Vector<3> gyro_0);
 
 void initBNO(Adafruit_BNO055 bno, int bno_number); 
 
